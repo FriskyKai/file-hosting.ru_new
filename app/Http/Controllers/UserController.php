@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
+    // Регистрация
     public function singIn(AuthRequest $request) {
         return response()->json([
             'success' => true,
@@ -20,6 +21,7 @@ class UserController extends Controller
         ])->setStatusCode(201);
     }
 
+    // Авторизация
     public function login(LoginRequest $request) {
         $credentials = request(['email', 'password']);
 
@@ -35,6 +37,7 @@ class UserController extends Controller
         ])->setStatusCode(200);
     }
 
+    // Выход
     public function logout(Request $request) {
         $request->user()->forceFill(['remember_token' => ''])->save();
     }

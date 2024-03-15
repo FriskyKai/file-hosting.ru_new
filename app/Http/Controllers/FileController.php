@@ -11,6 +11,7 @@ use Illuminate\Support\Str;
 
 class FileController extends Controller
 {
+    // Добавление нового файла
     public function store(FileStoreRequest $request) {
         if ($request->hasFile('files')) {
             $uploadedFiles = [];
@@ -47,6 +48,7 @@ class FileController extends Controller
         return response()->json(['message' => 'No files to upload'], 400);
     }
 
+    // Генерация уникального имени файла
     public function generateUniqueFileName($originalName, $extension) {
         $fileName = Str::slug(pathinfo($originalName, PATHINFO_FILENAME));
         $i = 1;
@@ -59,6 +61,7 @@ class FileController extends Controller
         return $fileName . '.' . $extension;
     }
 
+    // Редактирование файла
     public function edit(Request $request, $file_id) {
         $file = File::where('file_id', $file_id)->first();
 
@@ -80,6 +83,7 @@ class FileController extends Controller
         ]);
     }
 
+    // Удаление файла
     public function destroy($file_id) {
         $file = File::where('file_id', $file_id)->first();
 
@@ -100,5 +104,36 @@ class FileController extends Controller
             'code' => 200,
             'message' => 'File deleted',
         ]);
+    }
+
+    // Скачивание файла
+    public function download($file_id) {
+        $file = File::where('file_id', $file_id)->first();
+
+        if (!$file) {
+            return response()->json(['message' => 'Not Found'], 404);
+        }
+
+        if (!auth()->check() || auth()->user()->id !== $file->user_id) {
+            return response()->json(['message' => 'Forbidden for you'], 403);
+        }
+
+        $filePath = storage_path('app/uploads/' . $file->path);
+
+        if (!Storage::exists('uploads/' . $file->path)) {
+            return response()->json(['message' => 'Not found'], 404);
+        }
+
+        return response()->download($filePath, $file->name . '.' . $file->extension);
+    }
+
+    // Просмотр файлов пользователя
+    public function owned() {
+
+    }
+
+    // Просмотр файлов, к которым пользователь имеет доступ
+    public function allowed() {
+
     }
 }

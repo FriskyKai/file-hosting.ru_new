@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\FileController;
+use App\Http\Controllers\RightController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -16,15 +17,32 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+// Регистрация
 Route::post('/registration', [UserController::class, 'singIn']);
+// Авторизация
 Route::post('/authorization', [UserController::class, 'login']);
 
 Route::middleware('auth:api')->group(function () {
+    // Выход
     Route::get('/logout', [UserController::class, 'logout']);
-
+    // Добавление файла
     Route::post('/files', [FileController::class, 'store']);
 
+    // Просмотр файлов пользователя
+    Route::get('/files/disk', [FileController::class, 'owned']);
+    // Просмотр файлов, к которым имеет доступ пользователь
+    Route::get('/files/shared', [FileController::class, 'allowed']);
+
+    // Редактирование файла
     Route::patch('/files/{file_id}', [FileController::class, 'edit']);
+    // Удаление файла
     Route::delete('/files/{file_id}', [FileController::class, 'destroy']);
-    Route::delete('/files/{file_id}', [FileController::class, 'download']);
+    // Скачивание файла
+    Route::get('/files/{file_id}', [FileController::class, 'download']);
+
+    // Добавление прав доступа
+    Route::post('/files/{file_id}/accesses', [RightController::class, 'add']);
+    // Удаление прав доступа
+    Route::delete('/files/{file_id}/accesses', [RightController::class, 'destroy']);
+
 });
